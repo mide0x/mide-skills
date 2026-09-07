@@ -1,32 +1,89 @@
 # mide-skills
 
-This repository is mide's source of truth for personal Claude Code and Codex skills and Claude Code subagents. The manifest records each entry's source and the upstream commit used for vendored copies. Local skills are credited to mide.
+My personal skills for Claude Code and Codex, kept in one repo and installed on every machine with one command.
 
-Install with Node 22 or newer and Git:
+The repo holds the skills and subagents I want. A small CLI links them into both tools. When I add a skill here and push, every other machine picks it up with `update`.
+
+## Set up a new machine
+
+Install Node 22 or newer, Claude Code, and Codex. Then run:
 
 ```sh
 npx github:mide0x/mide-skills install
 ```
 
-From a checkout, run `npm install`, then `node bin/cli.mjs <command>`.
+That clones this repo to `~/.mide-skills`, links every skill and agent into Claude and Codex, and writes the model sheet. It asks one confirmation. Add `--yes` to skip it.
 
-- `install [--tools claude,codex] [--yes]` discovers the checkout, verifies providers, and links entries into available tools.
-- `update [--yes]` pulls the saved checkout with `git pull --ff-only` and reinstalls into all available tools without prompting.
-- `pick <source> [--subdir <path>]` selects and vendors upstream skills and agents through interactive checklists.
-- `add <name>` scaffolds and registers a local skill.
-- `doctor` checks links, model sheets, and startup integration for every available tool.
+## Add a skill to the repo
 
-Use `pick open-pstack` for pstack skills, or pass another git URL and its skill directory with `--subdir`. New sources require an attribution. Selection includes skills referenced through relative sibling paths. Imported Markdown loses the `pstack:` plugin prefix. Unchecking an entry removes its vendored copy. Imports refuse collisions with another source or unregistered content. Source symlinks are unsupported. Sources remain in the registry after their last entry is removed.
+Do this on the machine where you keep this checkout. There are two cases.
 
-Use `add my-skill` for your own skill, then edit `skills/my-skill/SKILL.md`. Names use lowercase letters, digits, underscores, and hyphens. Run `install` after adding or picking entries. Commit and push repository changes yourself, then run `npx github:mide0x/mide-skills update` on other machines.
+**Someone else wrote it.** Give `pick` the git repo it lives in. You get a checklist of every skill in that repo. Tick the ones you want.
 
-Install uses the current checkout or a parent checkout when its package name is `mide-skills`. Elsewhere it clones or updates `~/.mide-skills`. It saves only the absolute checkout path in `~/.config/mide-skills/state.json`. Keep that checkout in place because installed entries are symlinks. Pick and add require a checkout as the current directory or a parent. Doctor uses the current checkout or the saved path.
+```sh
+node bin/cli.mjs pick https://github.com/someone/their-skills
+```
 
-Claude skills link into `~/.claude/skills` and agents into `~/.claude/agents`. Codex skills link into `~/.agents/skills`. Real files and directories at those destinations are conflicts that the owner moves or removes. Installation replaces outdated symlinks and prunes removed entries only when their links resolve inside the checkout's corresponding skills or agents directory.
+The first time you pass a URL, `pick` asks for a credit line for the README. After that you can use the short name it saved, which is the last part of the URL:
 
-`config/pstack-models.md` is the shared model sheet. Installation copies it to `~/.claude/pstack-models.md` and `~/.codex/pstack-models.md`. Claude loads it through one `@~/.claude/pstack-models.md` line in `~/.claude/CLAUDE.md`. Codex receives its contents inside a managed marker block in `~/.codex/AGENTS.md`. Malformed Codex markers require manual repair.
+```sh
+node bin/cli.mjs pick their-skills
+```
 
-Every provider named by a `provider:model@effort` descriptor must have its CLI on PATH. Missing providers stop installation with their required descriptors. The check verifies executable availability, not authentication or model access. `--tools` narrows installation targets and does not relax this check. The seeded sheet requires Claude and Codex. An explicitly requested missing target also stops installation.
+pstack is already registered as `open-pstack`, so for it you run:
+
+```sh
+node bin/cli.mjs pick open-pstack
+```
+
+Untick a skill on a later run to remove it. If a skill reads a file inside another skill, `pick` adds that one too and tells you.
+
+**You are writing it yourself.** Scaffold it with `add`, then edit the file it prints.
+
+```sh
+node bin/cli.mjs add my-skill
+```
+
+**Then, in both cases,** link it here and push:
+
+```sh
+node bin/cli.mjs install --yes
+git add -A && git commit -m "Add my-skill" && git push
+```
+
+## Update the other machines
+
+```sh
+npx github:mide0x/mide-skills update
+```
+
+That pulls the repo and relinks. New skills appear. Removed skills are unlinked.
+
+## Commands
+
+| Command | What it does |
+|---|---|
+| `install [--tools claude,codex] [--yes]` | Link everything in the repo into the tools on this machine. |
+| `update` | Pull the repo and run install again. |
+| `pick <repo url or name> [--subdir <path>]` | Choose skills and agents from another repo and copy them in. |
+| `add <name>` | Scaffold a new personal skill. |
+| `doctor` | Report whether every link and the model sheet are in place. |
+
+Run them as `node bin/cli.mjs <command>` from this checkout, or as `npx github:mide0x/mide-skills <command>` anywhere.
+
+## How it works
+
+Skills are linked, not copied. Claude Code reads `~/.claude/skills` and `~/.claude/agents`. Codex reads `~/.agents/skills`. Each entry there is a symlink into this repo, so the checkout has to stay where it is. On a machine set up with the one-liner that is `~/.mide-skills`. On the machine where you run commands from a checkout, it is that checkout.
+
+`manifest.json` records every skill and agent, where it came from, and the upstream commit for copied ones. `pick` and `add` maintain it. Never copy a folder into `skills/` by hand.
+
+Skills copied from a plugin lose their plugin prefix. `pstack:tdd` becomes `tdd`, and the agent `pstack:pstack-fable-max` becomes `pstack-fable-max`.
+
+`config/pstack-models.md` is the model sheet that tells pstack-style skills which model runs each role. Install copies it to `~/.claude/pstack-models.md` and `~/.codex/pstack-models.md`. Claude loads it through an `@` include line in `~/.claude/CLAUDE.md`. Codex gets the same text inside a marked block in `~/.codex/AGENTS.md`.
+
+Every provider named in the sheet must have its CLI on the path. If one is missing, install stops and lists what is needed. This is deliberate. I install the same tools on every machine and would rather fix the machine than get a half working setup.
+
+## Credits
 
 <!-- credits:begin -->
 - **open-pstack**: Lauren Tan (pstack), Eric Litman (open-pstack). Source: https://github.com/ericlitman/open-pstack. Skills: none. Agents: none.
