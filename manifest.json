@@ -1,6 +1,8 @@
 {
   "sources": {
-    "local": { "credit": "mide" },
+    "local": {
+      "credit": "mide"
+    },
     "open-pstack": {
       "repo": "https://github.com/ericlitman/open-pstack",
       "subdir": "plugins/pstack",
@@ -8,8 +10,189 @@
     }
   },
   "skills": {
-    "explain": { "source": "local" },
-    "codex-first": { "source": "local" }
+    "explain": {
+      "source": "local"
+    },
+    "codex-first": {
+      "source": "local"
+    },
+    "architect": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "blast-radius": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "bro": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "create-verification-skill": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "deslop": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "fix-merge-conflicts": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "how": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "interrogate": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "maintain-verification-skill": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "poteto-mode": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "no-comments": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-boundary-discipline": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "recall": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "show-me-your-work": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "tdd": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "technical-writing": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "typescript-best-practices": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "unslop": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "what-did-i-get-done": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "why": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "arena": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-build-the-lever": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-encode-lessons-in-structure": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-exhaust-the-design-space": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-experience-first": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-fix-root-causes": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-foundational-thinking": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-guard-the-context-window": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-laziness-protocol": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-make-operations-idempotent": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-migrate-callers-then-delete-legacy-apis": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-minimize-reader-load": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-model-the-domain": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-never-block-on-the-human": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-outcome-oriented-execution": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-prove-it-works": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-redesign-from-first-principles": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-separate-before-serializing-shared-state": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-sequence-verifiable-units": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-subtract-before-you-add": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "principle-type-system-discipline": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    }
   },
-  "agents": {}
+  "agents": {
+    "pstack-fable-max": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "comment-sicko": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    },
+    "poteto-agent": {
+      "source": "open-pstack",
+      "commit": "56bfd14418fa733e34d98f714f357d28788470e3"
+    }
+  }
 }

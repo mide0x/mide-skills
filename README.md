@@ -84,16 +84,10 @@ Run them as `node bin/cli.mjs <command>` from this checkout, or as `npx github:m
 
 Skills are linked, not copied. Claude Code reads `~/.claude/skills` and `~/.claude/agents`. Codex reads `~/.agents/skills`. Each entry there is a symlink into this repo, so the checkout has to stay where it is. On a machine set up with the one-liner that is `~/.mide-skills`. On the machine where you run commands from a checkout, it is that checkout.
 
-`manifest.json` records every skill and agent, where it came from, and the upstream commit for copied ones. `pick` and `add` maintain it. Never copy a folder into `skills/` by hand.
-
-Skills copied from a plugin lose their plugin prefix. `pstack:tdd` becomes `tdd`, and the agent `pstack:pstack-fable-max` becomes `pstack-fable-max`.
-
-`config/pstack-models.md` is the model sheet that tells pstack-style skills which model runs each role. Install copies it to `~/.claude/pstack-models.md` and `~/.codex/pstack-models.md`. Claude loads it through an `@` include line in `~/.claude/CLAUDE.md`. Codex gets the same text inside a marked block in `~/.codex/AGENTS.md`.
-
 Every provider named in the sheet must have its CLI on the path. If one is missing, install stops and lists what is needed. This is deliberate. I install the same tools on every machine and would rather fix the machine than get a half working setup.
 
 ## Credits
 
 <!-- credits:begin -->
-- **open-pstack**: Lauren Tan (pstack), Eric Litman (open-pstack). Source: https://github.com/ericlitman/open-pstack. Skills: none. Agents: none.
+- **open-pstack**: Lauren Tan (pstack), Eric Litman (open-pstack). Source: https://github.com/ericlitman/open-pstack. Skills: architect, arena, blast-radius, bro, create-verification-skill, deslop, fix-merge-conflicts, how, interrogate, maintain-verification-skill, no-comments, poteto-mode, principle-boundary-discipline, principle-build-the-lever, principle-encode-lessons-in-structure, principle-exhaust-the-design-space, principle-experience-first, principle-fix-root-causes, principle-foundational-thinking, principle-guard-the-context-window, principle-laziness-protocol, principle-make-operations-idempotent, principle-migrate-callers-then-delete-legacy-apis, principle-minimize-reader-load, principle-model-the-domain, principle-never-block-on-the-human, principle-outcome-oriented-execution, principle-prove-it-works, principle-redesign-from-first-principles, principle-separate-before-serializing-shared-state, principle-sequence-verifiable-units, principle-subtract-before-you-add, principle-type-system-discipline, recall, show-me-your-work, tdd, technical-writing, typescript-best-practices, unslop, what-did-i-get-done, why. Agents: comment-sicko, poteto-agent, pstack-fable-max.
 <!-- credits:end -->
