@@ -36,7 +36,9 @@ pstack is already registered as `open-pstack`, so for it you run:
 node bin/cli.mjs pick open-pstack
 ```
 
-Untick a skill on a later run to remove it. If a skill reads a file inside another skill, `pick` adds that one too and tells you.
+Untick a skill on a later run to remove it. If a skill reads another skill, by file path or by name, `pick` adds that one too and tells you. That covers pstack's `principle-*` helpers, which cannot be invoked on their own.
+
+You never choose agents. `pick` reads `config/pstack-models.md`, adds the subagent file for every Claude lane the sheet names, and adds any other agent a picked skill mentions. Change the sheet and rerun `pick` to change the agents.
 
 **You are writing it yourself.** Scaffold it with `add`, then edit the file it prints.
 
@@ -71,7 +73,7 @@ That pulls the repo and relinks. New skills appear. Removed skills are unlinked.
 |---|---|
 | `install [--tools claude,codex] [--yes]` | Link everything in the repo into the tools on this machine. |
 | `update` | Pull the repo and run install again. |
-| `pick <repo url or name> [--subdir <path>]` | Choose skills and agents from another repo and copy them in. |
+| `pick <repo url or name> [--subdir <path>]` | Choose skills from another repo and copy them in, with the agents they need. |
 | `add <name>` | Scaffold a new personal skill. |
 | `doctor` | Report whether every link and the model sheet are in place. |
 | `dictionary [name...] [--all]` | Rewrite the plain-English summaries in `skill-dictionary.md`. No names fills in placeholders, `--all` redoes everything. |

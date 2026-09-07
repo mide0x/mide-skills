@@ -7,12 +7,12 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { context, readManifest, writeManifest, write, git, findRepo, stateRepo } from '../lib/manifest.mjs';
 import { parseLanes, verifyLanes, claudeIntegration, codexIntegration, syncLinks, linkStatus, detectTargets } from '../lib/targets.mjs';
-import pick, { rewritePrefix, dependencies, closeDependencies, frontmatter, credits } from '../lib/pick.mjs';
+import pick, { rewritePrefix, dependencies, closeDependencies, frontmatter, credits, requiredAgents } from '../lib/pick.mjs';
 import install, { installTargets } from '../lib/install.mjs';
 import add from '../lib/add.mjs';
 import doctor from '../lib/doctor.mjs';
 import update from '../lib/update.mjs';
-import dictionary, { parseDictionary, renderDictionary, updateDictionary, PLACEHOLDER } from '../lib/dictionary.mjs';
+import dictionary, { parseDictionary, renderDictionary, updateDictionary, invocable, PLACEHOLDER } from '../lib/dictionary.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const sheet = fs.readFileSync(path.join(root, 'config/pstack-models.md'), 'utf8');
@@ -66,7 +66,15 @@ test('dependency scanner closes cycles and scans nested non-Markdown files', t =
   write(path.join(directory, 'b/nested/run.sh'), '../c/reference/file');
   write(path.join(directory, 'c/SKILL.md'), '../a/SKILL.md');
   write(path.join(directory, 'a/.DS_Store'), '../c/');
-  assert.deepEqual(dependencies(path.join(directory, 'a'), ['a', 'b', 'c']), ['b']);
+  assert.deepEqual([...dependencies(path.join(directory, 'a'), ['a', 'b', 'c']).keys()], ['b']);
+  write(path.join(directory, 'd/SKILL.md'), '---\nname: d\nuser-invocable: false\n---\n');
+  write(path.join(directory, 'e/SKILL.md'), 'Read **d** and principle-d but not dd.');
+  assert.equal(invocable(fs.readFileSync(path.join(directory, 'd/SKILL.md'), 'utf8')), false);
+  assert.equal(invocable('---\nname: x\n---\n'), true);
+  assert.deepEqual(closeDependencies(['e'], directory, ['a', 'b', 'c', 'd', 'e'], ['d']), ['e', 'd']);
+  write(path.join(directory, 'f/SKILL.md'), 'Spawn poteto-agent here.');
+  const agents = requiredAgents('x: claude:fable@max, codex:gpt-6-astra@high', directory, ['f'], ['pstack-fable-max', 'pstack-fable-high', 'pstack-opus-xhigh', 'poteto-agent', 'comment-sicko']);
+  assert.deepEqual([...agents.keys()], ['pstack-fable-max', 'poteto-agent']);
   assert.deepEqual(closeDependencies(['a'], directory, ['a', 'b', 'c']), ['a', 'b', 'c']);
   assert.deepEqual(frontmatter('---\nname: "a"\ndescription: >-\n  First line\n  second line\n---\n'), { name: 'a', description: 'First line second line' });
 });
@@ -138,7 +146,7 @@ test('add scaffolds a local skill, rejects collisions and traversal', t => {
 
 test('pick vendors local git fixtures, closes dependencies, propagates deletions, and updates credits', async t => {
   const ctx = fixture(t), upstream = path.join(ctx.home, 'upstream');
-  write(path.join(upstream, 'skills/a/SKILL.md'), '---\nname: a\ndescription: A skill\n---\npstack:tdd ../b/SKILL.md');
+  write(path.join(upstream, 'skills/a/SKILL.md'), '---\nname: a\ndescription: A skill\n---\npstack:tdd ../b/SKILL.md reviewer');
   write(path.join(upstream, 'skills/a/obsolete.md'), 'Old');
   write(path.join(upstream, 'skills/a/.DS_Store'), 'Ignore');
   write(path.join(upstream, 'skills/b/SKILL.md'), 'pstack:bro');
@@ -148,9 +156,9 @@ test('pick vendors local git fixtures, closes dependencies, propagates deletions
   commit(upstream);
   const copy = fs.cpSync;
   const interrupted = t.mock.method(fs, 'cpSync', (...args) => { copy(...args); throw new Error('Simulated interruption'); });
-  await assert.rejects(pick(ctx, { source: `file://${upstream}` }, prompts([['a'], ['reviewer']])), /Simulated interruption/);
+  await assert.rejects(pick(ctx, { source: `file://${upstream}` }, prompts([['a']])), /Simulated interruption/);
   interrupted.mock.restore();
-  await pick(ctx, { source: `file://${upstream}` }, prompts([['a'], ['reviewer']]));
+  await pick(ctx, { source: `file://${upstream}` }, prompts([['a']]));
   const manifest = readManifest(ctx.cwd);
   assert.equal(manifest.skills.b.source, 'upstream');
   assert.equal(manifest.skills.a.commit, git(['rev-parse', 'HEAD'], upstream, ctx));
@@ -161,14 +169,15 @@ test('pick vendors local git fixtures, closes dependencies, propagates deletions
   const collision = readManifest(ctx.cwd);
   collision.skills.a.source = 'local';
   writeManifest(ctx.cwd, collision);
-  await assert.rejects(pick(ctx, { source: 'upstream' }, prompts([['a'], []])), /Refusing to overwrite skills\/a/);
+  await assert.rejects(pick(ctx, { source: 'upstream' }, prompts([['a']])), /Refusing to overwrite skills\/a/);
   writeManifest(ctx.cwd, manifest);
   fs.unlinkSync(path.join(upstream, 'skills/a/obsolete.md'));
+  write(path.join(upstream, 'skills/a/SKILL.md'), '---\nname: a\ndescription: A skill\n---\npstack:tdd ../b/SKILL.md');
   commit(upstream);
-  await pick(ctx, { source: 'upstream' }, prompts([['a'], []]));
+  await pick(ctx, { source: 'upstream' }, prompts([['a']]));
   assert.equal(fs.existsSync(path.join(ctx.cwd, 'skills/a/obsolete.md')), false);
   assert.equal(fs.existsSync(path.join(ctx.cwd, 'agents/reviewer.md')), false);
-  await pick(ctx, { source: 'upstream' }, prompts([[], []]));
+  await pick(ctx, { source: 'upstream' }, prompts([[]]));
   assert.equal(fs.existsSync(path.join(ctx.cwd, 'skills/a')), false);
   assert.deepEqual(Object.keys(readManifest(ctx.cwd).skills).sort(), ['codex-first', 'explain']);
   assert.deepEqual([...parseDictionary(fs.readFileSync(path.join(ctx.cwd, 'skill-dictionary.md'), 'utf8')).keys()], ['codex-first', 'explain']);
@@ -222,7 +231,14 @@ test('dictionary regenerates only what is asked, skips unchanged writes, and fol
   assert.deepEqual(calls, ['codex-first']);
   dictionary(ctx, { all: true });
   assert.deepEqual(calls, ['codex-first', 'explain', 'codex-first']);
-  assert.throws(() => dictionary(ctx, { names: ['nope'] }), /Not in manifest/);
+  assert.throws(() => dictionary(ctx, { names: ['nope'] }), /Not an invocable skill/);
+  write(path.join(ctx.cwd, 'skills/helper/SKILL.md'), '---\nname: helper\nuser-invocable: false\n---\n');
+  const withHelper = readManifest(ctx.cwd);
+  withHelper.skills.helper = { source: 'local' };
+  writeManifest(ctx.cwd, withHelper);
+  dictionary(ctx, { all: true });
+  assert.equal(read().has('helper'), false);
+  assert.throws(() => dictionary(ctx, { names: ['helper'] }), /Not an invocable skill/);
   const manifest = readManifest(ctx.cwd);
   delete manifest.skills['codex-first'];
   writeManifest(ctx.cwd, manifest);
