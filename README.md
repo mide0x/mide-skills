@@ -44,6 +44,12 @@ Untick a skill on a later run to remove it. If a skill reads a file inside anoth
 node bin/cli.mjs add my-skill
 ```
 
+Every `pick` and `add` also refreshes `skill-dictionary.md`, a plain-English list of when to use each skill. Picked skills get a one-sentence summary written by Claude right away. A skill you scaffold with `add` gets a placeholder, so once you finish writing it run:
+
+```sh
+node bin/cli.mjs dictionary my-skill
+```
+
 **Then, in both cases,** link it here and push:
 
 ```sh
@@ -68,6 +74,7 @@ That pulls the repo and relinks. New skills appear. Removed skills are unlinked.
 | `pick <repo url or name> [--subdir <path>]` | Choose skills and agents from another repo and copy them in. |
 | `add <name>` | Scaffold a new personal skill. |
 | `doctor` | Report whether every link and the model sheet are in place. |
+| `dictionary [name...] [--all]` | Rewrite the plain-English summaries in `skill-dictionary.md`. No names fills in placeholders, `--all` redoes everything. |
 
 Run them as `node bin/cli.mjs <command>` from this checkout, or as `npx github:mide0x/mide-skills <command>` anywhere.
 

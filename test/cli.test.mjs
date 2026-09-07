@@ -12,6 +12,7 @@ import install, { installTargets } from '../lib/install.mjs';
 import add from '../lib/add.mjs';
 import doctor from '../lib/doctor.mjs';
 import update from '../lib/update.mjs';
+import dictionary, { parseDictionary, renderDictionary, updateDictionary, PLACEHOLDER } from '../lib/dictionary.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const sheet = fs.readFileSync(path.join(root, 'config/pstack-models.md'), 'utf8');
@@ -23,7 +24,9 @@ function fixture(t) {
   for (const name of ['explain', 'codex-first']) write(path.join(repo, 'skills', name, 'SKILL.md'), `---\nname: ${name}\ndescription: Fixture\n---\n`);
   const bin = path.join(home, 'bin');
   for (const cli of ['claude', 'codex']) { write(path.join(bin, cli), '#!/bin/sh\nexit 0\n'); fs.chmodSync(path.join(bin, cli), 0o755); }
-  return context({ home, cwd: repo, env: { ...process.env, HOME: home, PATH: `${bin}:/usr/bin:/bin`, GIT_CONFIG_NOSYSTEM: '1' } });
+  const ctx = context({ home, cwd: repo, env: { ...process.env, HOME: home, PATH: `${bin}:/usr/bin:/bin`, GIT_CONFIG_NOSYSTEM: '1' } });
+  ctx.summarize = directory => `Summary of ${path.basename(directory)}.`;
+  return ctx;
 }
 const prompts = selections => ({ multiselect: async () => selections.shift(), text: async () => 'Fixture author', isCancel: value => typeof value === 'symbol' });
 
@@ -154,6 +157,7 @@ test('pick vendors local git fixtures, closes dependencies, propagates deletions
   assert.match(fs.readFileSync(path.join(ctx.cwd, 'skills/a/SKILL.md'), 'utf8'), /tdd/);
   assert.equal(fs.existsSync(path.join(ctx.cwd, 'skills/a/.DS_Store')), false);
   assert.equal(fs.readFileSync(path.join(ctx.cwd, 'agents/reviewer.md'), 'utf8'), 'pstack-fable-max');
+  assert.equal(parseDictionary(fs.readFileSync(path.join(ctx.cwd, 'skill-dictionary.md'), 'utf8')).get('b'), 'Summary of b.');
   const collision = readManifest(ctx.cwd);
   collision.skills.a.source = 'local';
   writeManifest(ctx.cwd, collision);
@@ -167,6 +171,7 @@ test('pick vendors local git fixtures, closes dependencies, propagates deletions
   await pick(ctx, { source: 'upstream' }, prompts([[], []]));
   assert.equal(fs.existsSync(path.join(ctx.cwd, 'skills/a')), false);
   assert.deepEqual(Object.keys(readManifest(ctx.cwd).skills).sort(), ['codex-first', 'explain']);
+  assert.deepEqual([...parseDictionary(fs.readFileSync(path.join(ctx.cwd, 'skill-dictionary.md'), 'utf8')).keys()], ['codex-first', 'explain']);
   const readme = fs.readFileSync(path.join(ctx.cwd, 'README.md'), 'utf8');
   assert.equal(credits(readme, readManifest(ctx.cwd)), readme);
   assert.match(readme, /\*\*upstream\*\*: Fixture author/);
@@ -197,4 +202,31 @@ test('CLI help, invalid flags, and doctor failures have deliberate exit codes', 
   assert.equal(result.status, 1);
   assert.match(result.stderr, /Doctor found problems/);
   assert.doesNotMatch(result.stderr, /at .*\.mjs:/);
+});
+
+test('dictionary regenerates only what is asked, skips unchanged writes, and follows the manifest', t => {
+  const ctx = fixture(t), calls = [], file = path.join(ctx.cwd, 'skill-dictionary.md');
+  ctx.summarize = directory => { calls.push(path.basename(directory)); return `Summary of ${path.basename(directory)}.`; };
+  const read = () => parseDictionary(fs.readFileSync(file, 'utf8'));
+  updateDictionary(ctx.cwd, ctx);
+  assert.deepEqual([...read()], [['codex-first', PLACEHOLDER], ['explain', PLACEHOLDER]]);
+  assert.equal(renderDictionary(read()), fs.readFileSync(file, 'utf8'));
+  dictionary(ctx, { names: ['explain'] });
+  assert.equal(read().get('explain'), 'Summary of explain.');
+  assert.equal(read().get('codex-first'), PLACEHOLDER);
+  const mtime = fs.statSync(file).mtimeMs;
+  calls.length = 0;
+  updateDictionary(ctx.cwd, ctx);
+  assert.equal(fs.statSync(file).mtimeMs, mtime);
+  dictionary(ctx, {});
+  assert.deepEqual(calls, ['codex-first']);
+  dictionary(ctx, { all: true });
+  assert.deepEqual(calls, ['codex-first', 'explain', 'codex-first']);
+  assert.throws(() => dictionary(ctx, { names: ['nope'] }), /Not in manifest/);
+  const manifest = readManifest(ctx.cwd);
+  delete manifest.skills['codex-first'];
+  writeManifest(ctx.cwd, manifest);
+  assert.deepEqual(updateDictionary(ctx.cwd, ctx).dropped, ['codex-first']);
+  add(ctx, { name: 'fresh' });
+  assert.equal(read().get('fresh'), PLACEHOLDER);
 });
