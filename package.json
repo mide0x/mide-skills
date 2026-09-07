@@ -1,0 +1,10 @@
+{
+  "name": "mide-skills",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "bin": { "mide-skills": "bin/cli.mjs" },
+  "scripts": { "test": "node --test" },
+  "engines": { "node": ">=22" },
+  "dependencies": { "@clack/prompts": "^0.11.0" }
+}

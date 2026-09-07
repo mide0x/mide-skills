@@ -1,0 +1,15 @@
+{
+  "sources": {
+    "local": { "credit": "mide" },
+    "open-pstack": {
+      "repo": "https://github.com/ericlitman/open-pstack",
+      "subdir": "plugins/pstack",
+      "credit": "Lauren Tan (pstack), Eric Litman (open-pstack)"
+    }
+  },
+  "skills": {
+    "explain": { "source": "local" },
+    "codex-first": { "source": "local" }
+  },
+  "agents": {}
+}
