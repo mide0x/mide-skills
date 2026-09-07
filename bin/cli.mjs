@@ -8,13 +8,16 @@ const commands = {
   pick: { subdir: { type: 'string' } },
   add: {},
   doctor: {},
+  dictionary: { all: { type: 'boolean' } },
 };
+const positionalKeys = { pick: 'source', add: 'name', dictionary: 'names' };
 const help = `mide-skills
   install [--tools claude,codex] [--yes]  Link skills and model settings
   update [--yes]                         Pull and reinstall without prompting
   pick <source> [--subdir <path>]         Vendor skills and agents
   add <name>                            Scaffold a local skill
-  doctor                                Check links and model settings`;
+  doctor                                Check links and model settings
+  dictionary [name...] [--all]          Rewrite plain-English summaries in skill-dictionary.md`;
 try {
   const [command, ...args] = process.argv.slice(2);
   if (!command || command === '--help' || command === '-h') console.log(help);
@@ -23,10 +26,10 @@ try {
     const { values, positionals } = parseArgs({ args, options: { ...commands[command], help: { type: 'boolean', short: 'h' } }, allowPositionals: true });
     if (values.help) console.log(help);
     else {
-      const positional = command === 'pick' ? 'source' : command === 'add' ? 'name' : null;
-      if (positionals.length !== (positional ? 1 : 0)) throw new Error(`Invalid arguments for ${command}\n${help}`);
+      const key = positionalKeys[command];
+      if (key !== 'names' && positionals.length !== (key ? 1 : 0)) throw new Error(`Invalid arguments for ${command}\n${help}`);
       const { default: run } = await import(`../lib/${command}.mjs`);
-      await run(context(), { ...values, ...(positional ? { [positional]: positionals[0] } : {}) });
+      await run(context(), { ...values, ...(key === 'names' ? { names: positionals } : key ? { [key]: positionals[0] } : {}) });
     }
   }
 } catch (error) {
